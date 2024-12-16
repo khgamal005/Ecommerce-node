@@ -1,64 +1,31 @@
 const express = require("express");
 const app = express();
-require('dotenv').config()
-const morgan = require('morgan');
-const connectDB = require('./config/db')
-const categoryModel = require("./model/categoryModel")
+require("dotenv").config();
+const morgan = require("morgan");
+const connectDB = require("./config/db");
+const categoryRoute = require("./routes/categoryRoute");
+const ApiError = require("./utils/apiError");
+const globalError = require("./middlewares/errorMiddleware");
+
+app.use(express.json())
 
 
-
-
-app.use(express.json());
-
-
-
-
-
-
-if (process.env.NODE_ENV === 'development') {
-    app.use(morgan('dev'));
-    console.log(`mode: ${process.env.NODE_ENV}`);
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+  console.log(`mode: ${process.env.NODE_ENV}`);
 }
 
+app.use("/api/v1/categories", categoryRoute);
 
-const getCategories = (req, res) => {
-    const name = req.body.name;
-    const price = req.body.price;
-    console.log(req.body);
+app.all("*", (req, res, next) => {
+  next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
+});
 
-    const newCategory = new categoryModel({ name,price });
-    newCategory
-        .save()
-        .then((doc) => {
-            res.json(doc);
-        })
-        .catch((err) => {
-            res.json(err);
-        });
-};
+app.use(globalError);
 
-app.post("/", getCategories)
-
-
-
-app.get("/",(req,res)=>{
-    res.send("hi")
-})
-
-
-
-
-
-
-
-
-
-const PORT = process.env.PORT
+const PORT = process.env.PORT;
 connectDB().then(() => {
-
-    app.listen(PORT, () => {
-        console.log("Server is running " + PORT)
-    })
-
-})
-
+  app.listen(PORT, () => {
+    console.log("Server is running " + PORT);
+  });
+});
