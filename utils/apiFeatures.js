@@ -38,14 +38,19 @@ class ApiFeatures {
     return this;
   }
 
-  search() {
+
+  search(modelName) {
     if (this.queryString.keyword) {
       let query = {};
-      query.$or = [
-        { title: { $regex: this.queryString.keyword, $options: 'i' } },
-        { description: { $regex: this.queryString.keyword, $options: 'i' } },
-      ];
-      
+      if (modelName === 'Products') {
+        query.$or = [
+          { title: { $regex: this.queryString.keyword, $options: 'i' } },
+          { description: { $regex: this.queryString.keyword, $options: 'i' } },
+        ];
+      } else  {
+        query = { name: { $regex: this.queryString.keyword, $options: 'i' } };
+      }
+
       this.mongooseQuery = this.mongooseQuery.find(query);
     }
     return this;
@@ -71,10 +76,10 @@ class ApiFeatures {
     if (skip > 0) {
       pagination.prev = page - 1;
     }
-    console.log(pagination,skip)
     this.mongooseQuery = this.mongooseQuery.skip(skip).limit(limit);
-
+    
     this.paginationResult = pagination;
+    // console.log(this.paginationResult,skip)
     return this;
   }
 }
