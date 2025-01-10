@@ -49,6 +49,7 @@ exports.createUser = factory.createOne(User);
 // @route   PUT /api/v1/users/:id
 // @access  Private/Admin
 exports.updateUser = asyncHandler(async (req, res, next) => {
+  consol.log(req)
   const document = await User.findByIdAndUpdate(
     req.params.id,
     {

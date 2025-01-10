@@ -34,8 +34,8 @@ const router = express.Router();
 // router.put('/updateMe', updateLoggedUserValidator, updateLoggedUserData);
 // router.delete('/deleteMe', deleteLoggedUserData);
 
-// // Admin
-// router.use(authService.allowedTo('admin', 'manager'));
+// Admin
+router.use(authService.allowedTo('admin', 'manager'));
 router.put(
   '/changePassword/:id',
   changeUserPasswordValidator,

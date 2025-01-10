@@ -56,7 +56,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
-    console.log(token)
+
   }
   if (!token) {
     return next(
@@ -120,6 +120,7 @@ exports.allowedTo = (...roles) =>
 // @route   POST /api/v1/auth/forgotPassword
 // @access  Public
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
+  console.log(req.body)
   // 1) Get user by email
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
@@ -143,7 +144,8 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   await user.save();
 
   // 3) Send the reset code via email
-  const message = `Hi ${user.name},\n We received a request to reset the password on your E-shop Account. \n ${resetCode} \n Enter this code to complete the reset. \n Thanks for helping us keep your account secure.\n The E-shop Team`;
+  const message = `Hi ${user.name},\n We received a request to reset the password on your E-shop Account. \n ${resetCode}
+   \n Enter this code to complete the reset. \n Thanks for helping us keep your account secure.\n The E-shop Team`;
   try {
     await sendEmail({
       email: user.email,
