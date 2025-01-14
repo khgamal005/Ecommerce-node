@@ -120,7 +120,7 @@ exports.allowedTo = (...roles) =>
 // @route   POST /api/v1/auth/forgotPassword
 // @access  Public
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
-  console.log(req.body)
+
   // 1) Get user by email
   const user = await User.findOne({ email: req.body.email });
   if (!user) {

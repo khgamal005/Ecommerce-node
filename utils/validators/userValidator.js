@@ -137,7 +137,8 @@ exports.updateLoggedUserValidator = [
       return true;
     }),
   check('email')
-    .notEmpty()
+  .optional()
+  .notEmpty()
     .withMessage('Email required')
     .isEmail()
     .withMessage('Invalid email address')

@@ -27,12 +27,12 @@ const {
 
 const router = express.Router();
 
-// router.use(authService.protect);
+router.use(authService.protect);
 
-// router.get('/getMe', getLoggedUserData, getUser);
-// router.put('/changeMyPassword', updateLoggedUserPassword);
-// router.put('/updateMe', updateLoggedUserValidator, updateLoggedUserData);
-// router.delete('/deleteMe', deleteLoggedUserData);
+router.get('/getMe', getLoggedUserData, getUser);
+router.put('/changeMyPassword', updateLoggedUserPassword);
+router.put('/updateMe', updateLoggedUserValidator, updateLoggedUserData);
+router.delete('/deleteMe', deleteLoggedUserData);
 
 // Admin
 router.use(authService.allowedTo('admin', 'manager'));
