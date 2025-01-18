@@ -1,7 +1,13 @@
 const express = require("express");
 const path = require('path');
+const bodyParser = require('body-parser');
 
+
+
+// Use body-parser middleware
 const app = express();
+app.use(bodyParser.json());
+
 require("dotenv").config();
 const morgan = require("morgan");
 const connectDB = require("./config/db");
@@ -15,7 +21,9 @@ const userRoute = require('./routes/userRoute');
 const authRoute = require('./routes/authRoute');
 const reviewRoute = require('./routes/reviewRoute');
 const wishlistRoute = require('./routes/wishlistRoute');
- const addressRoute = require('./routes/addressRoute');
+const addressRoute = require('./routes/addressRoute');
+const couponRoute = require('./routes/couponRoute');
+const cartRoute = require('./routes/cartRoute');
 
 
 app.use(express.json())
@@ -37,6 +45,8 @@ app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/reviews', reviewRoute);
 app.use('/api/v1/wishlist', wishlistRoute);
 app.use('/api/v1/addresses', addressRoute);
+app.use('/api/v1/coupons', couponRoute);
+app.use('/api/v1/cart', cartRoute);
 
 
 app.all("*", (req, res, next) => {
