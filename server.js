@@ -1,12 +1,19 @@
 const express = require("express");
 const path = require('path');
 const bodyParser = require('body-parser');
+const cors = require('cors');
+const compression = require('compression');
+
 
 
 
 // Use body-parser middleware
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
+app.options('*', cors());
+
+app.use(compression());
 
 require("dotenv").config();
 const morgan = require("morgan");
@@ -24,6 +31,7 @@ const wishlistRoute = require('./routes/wishlistRoute');
 const addressRoute = require('./routes/addressRoute');
 const couponRoute = require('./routes/couponRoute');
 const cartRoute = require('./routes/cartRoute');
+const orderRoute = require('./routes/orderRoute');
 
 
 app.use(express.json())
@@ -47,6 +55,7 @@ app.use('/api/v1/wishlist', wishlistRoute);
 app.use('/api/v1/addresses', addressRoute);
 app.use('/api/v1/coupons', couponRoute);
 app.use('/api/v1/cart', cartRoute);
+app.use('/api/v1/orders', orderRoute);
 
 
 app.all("*", (req, res, next) => {
