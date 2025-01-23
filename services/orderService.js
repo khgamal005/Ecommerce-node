@@ -217,6 +217,7 @@ const createCardOrder = async (session) => {
 
     // 5) Clear cart depend on cartId
     await Cart.findByIdAndDelete(cartId);
+    console.log("delete card")
   }
 };
 
