@@ -67,7 +67,7 @@ app.use(globalError);
 
 app.post(
   '/webhook',
-  express.raw({ type: 'application/json' }),
+  bodyParser.raw({ type: 'application/json' }),
   webhookCheckout
 );
 const PORT = 8080 || process.env.PORT
