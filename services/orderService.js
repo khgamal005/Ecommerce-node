@@ -239,6 +239,7 @@ exports.webhookCheckout = asyncHandler(async (req, res, next) => {
   }
   if (event.type === 'checkout.session.completed') {
     //  Create order
+    console.log("create order here")
     createCardOrder(event.data.object);
   }
 
