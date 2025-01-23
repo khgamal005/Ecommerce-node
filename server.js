@@ -32,6 +32,7 @@ const addressRoute = require('./routes/addressRoute');
 const couponRoute = require('./routes/couponRoute');
 const cartRoute = require('./routes/cartRoute');
 const orderRoute = require('./routes/orderRoute');
+const { webhookCheckout } = require('./services/orderService')
 
 
 app.use(express.json())
@@ -64,7 +65,11 @@ app.all("*", (req, res, next) => {
 
 app.use(globalError);
 
-
+app.post(
+  '/webhook',
+  express.raw({ type: 'application/json' }),
+  webhookCheckout
+);
 const PORT = 8080 || process.env.PORT
 const server = 
   app.listen(PORT, () => {
