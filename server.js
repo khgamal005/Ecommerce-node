@@ -66,7 +66,7 @@ app.all("*", (req, res, next) => {
 app.use(globalError);
 
 app.post(
-  '/webhook',
+  '/webhook-checkout',
   bodyParser.raw({ type: 'application/json' }),
   webhookCheckout
 );
