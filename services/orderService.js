@@ -139,7 +139,7 @@ exports.checkoutSession = asyncHandler(async (req, res, next) => {
 
   const totalOrderPrice = cartPrice + taxPrice + shippingPrice;
 
-  // 3) Create stripe checkout session
+
   // const session = await stripe.checkout.sessions.create({
 
   //     line_items: [
@@ -224,25 +224,119 @@ const createCardOrder = async (session) => {
 // @desc    This webhook will run when stripe payment success paid
 // @route   POST /webhook-checkout
 // @access  Protected/User
-exports.webhookCheckout = asyncHandler(async (req, res, next) => {
-  const sig = req.headers['stripe-signature'];
+
+// exports.webhookCheckout = asyncHandler(async (req, res, next) => {
+//   const sig = req.headers['stripe-signature'];
+//   let event;
+
+//   try {
+//     event = stripe.webhooks.constructEvent(
+//       req.body,
+//       sig,
+//       process.env.STRIPE_WEBHOOK_SECRET
+//     );
+//     console.log('Webhook event constructed:', event.type);
+//   } catch (err) {
+//     console.error('Webhook signature verification failed:', err.message);
+//     return res.status(400).send(`Webhook Error: ${err.message}`);
+//   }
+
+//   if (event.type === 'checkout.session.completed') {
+//     console.log('Payment completed! Processing order...');
+//     try {
+//       await createCardOrder(event.data.object);
+//       console.log('Order created successfully.');
+//     } catch (err) {
+//       console.error('Error creating order:', err.message);
+//     }
+//   }
+
+//   res.status(200).json({ received: true });
+// });
+
+
+
+
+async function getLIneItems(lineItems){
+  let ProductItems = []
+
+  if(lineItems?.data?.length){
+      for(const item of lineItems.data){
+          const product = await stripe.products.retrieve(item.price.product)
+          const productId = product.metadata._id
+
+          const productData = {
+              productId : _id,
+              name : product.title,
+              price : item.price.unit_amount / 100,
+              quantity : item.quantity,
+              image : product.images
+          }
+          ProductItems.push(productData)
+      }
+  }
+
+  return ProductItems
+}
+
+exports.webhookCheckout= async(request,response) => {
+  const sig = request.headers['stripe-signature'];
+
+  const payloadString = JSON.stringify(request.body)
+
+  const header = stripe.webhooks.generateTestHeaderString({
+      payload: payloadString,
+      secret : endpointSecret,
+  });
 
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
+      event = stripe.webhooks.constructEvent(payloadString, header, endpointSecret);
   } catch (err) {
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-  if (event.type === 'checkout.session.completed') {
-    //  Create order
-    console.log("create order here")
-    createCardOrder(event.data.object);
+      response.status(400).send(`Webhook Error: ${err.message}`);
+      return;
   }
 
-  res.status(200).json({ received: true });
-});
+
+  // Handle the event
+switch (event.type) {
+  case 'checkout.session.completed':
+    const session = event.data.object;
+
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id)
+
+    const productDetails = await getLIneItems(lineItems)
+
+    const orderDetails = {
+       productDetails : productDetails,
+       email : session.customer_email,
+       userId : session.metadata.userId,
+       paymentDetails : {
+          paymentId : session.payment_intent,
+          payment_method_type : session.payment_method_types,
+          payment_status : session.payment_status,
+      },
+     
+   
+      totalAmount : session.amount_total / 100
+    }
+
+  const order = new Order(orderDetails)
+  const saveOrder = await order.save()
+
+  if(saveOrder?._id){
+      // const deleteCartItem = await addToCartModel.deleteMany({ userId : session.metadata.userId })
+      await Cart.findByIdAndDelete(cartId);
+      console.log("delete card")
+  }
+  break;
+
+  // ... handle other event types
+  default:
+    console.log(`Unhandled event type ${event.type}`);
+}
+
+  response.status(200).send();
+}
+
