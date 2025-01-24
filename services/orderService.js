@@ -139,48 +139,62 @@ exports.checkoutSession = asyncHandler(async (req, res, next) => {
 
   const totalOrderPrice = cartPrice + taxPrice + shippingPrice;
   const user = await User.findOne({ _id : request.user })
-
+  const session = await stripe.checkout.sessions.create({
+    line_items: [
+      {
+        name: req.user.name,
+        amount: totalOrderPrice * 100,
+        currency: 'egp',
+        quantity: 1,
+      },
+    ],
+    mode: 'payment',
+    success_url: `${req.protocol}://${req.get('host')}/orders`,
+    cancel_url: `${req.protocol}://${req.get('host')}/cart`,
+    customer_email: req.user.email,
+    client_reference_id: req.params.cartId,
+    metadata: req.body.shippingAddress,
 
 
   
-  const params = {
-    submit_type : 'pay',
-    mode : "payment",
-    payment_method_types : ['card'],
-    billing_address_collection : 'auto',
+//   const params = {
+//     submit_type : 'pay',
+//     mode : "payment",
+//     payment_method_types : ['card'],
+//     billing_address_collection : 'auto',
    
-    customer_email : user.email,
-    metadata : {
-        userId : request.userId
-    },
-    line_items : cartItems.map((item,index)=>{
-        return{
-            price_data : {
-              currency : 'EGP',
-              product_data : {
-                name : item.product,
+//     customer_email : user.email,
+//     metadata : {
+//         userId : request.userId
+//     },
+//     line_items : cartItems.map((item,index)=>{
+//         return{
+//             price_data : {
+//               currency : 'EGP',
+//               product_data : {
+//                 name : item.product,
             
-                metadata : {
-                    productId : item.productId._id
-                }
-              },
-              unit_amount : totalOrderPrice * 100
-            },
-            adjustable_quantity : {
-                enabled : true,
-                minimum : 1
-            },
-            quantity : item. quantity
+//                 metadata : {
+//                     productId : item.productId._id
+//                 }
+//               },
+//               unit_amount : totalOrderPrice * 100
+//             },
+//             adjustable_quantity : {
+//                 enabled : true,
+//                 minimum : 1
+//             },
+//             quantity : item. quantity
 
-        }
-    }),
-    success_url : `${process.env.FRONTEND_URL}/success`,
-    cancel_url : `${process.env.FRONTEND_URL}/cancel`,
-}
+//         }
+//     }),
+//     success_url : `${process.env.FRONTEND_URL}/success`,
+//     cancel_url : `${process.env.FRONTEND_URL}/cancel`,
+// }
 
-const session = await stripe.checkout.sessions.create(params)
+// const session = await stripe.checkout.sessions.create(params)
 
-response.status(303).json(session)
+// response.status(303).json(session)
 
 });
 
